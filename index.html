@@ -28,6 +28,7 @@ p.sub{margin:0 0 16px;color:var(--mut);font-size:15px}
 .cal div.h{font-size:12px;color:var(--mut);text-align:center}
 .cal button{aspect-ratio:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
 .cal button.on,.slot.on,.pk.on{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.cal button[disabled]{opacity:.3;cursor:not-allowed}
 .slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .slot{padding:14px 8px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;font:inherit;font-weight:600;cursor:pointer}
 .pk{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;font:inherit;cursor:pointer;position:relative}
@@ -58,8 +59,8 @@ input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px soli
 </main>
 <script>
 // À RENSEIGNER : où Bouvann reçoit les réservations
-const NOTIFY_WHATSAPP = ""; // ex. "22890000000" (indicatif + numéro, sans +)
-const NOTIFY_EMAIL = "";    // ex. "contact@bouvann.com"
+const NOTIFY_WHATSAPP = "2250586868619"; // Bovann : +225 05 86 86 86 19
+const NOTIFY_EMAIL = "contact@bovanngroup.com"; // e-mail de Bovann Group
 
 const PACKS = [
   {id:1,n:`Live 1h30`,d:`1h30 en studio ou à distance, avec régie`,p:15000,h:1.5},
@@ -73,14 +74,18 @@ const HOURS = [`08:00`,`10:00`,`12:00`,`14:00`,`16:00`,`18:00`];
 const S = {step:0,mode:null,date:null,time:null,pack:null,f:{nom:``,tel:``,email:``,biz:``,produit:``,ville:``}};
 const $ = id => document.getElementById(id);
 const fmt = n => n.toLocaleString(`fr-FR`)+` FCFA`;
-const MONTH = {y:2026,m:11}; // décembre 2026
-const dateLabel = d => new Date(MONTH.y,MONTH.m,d).toLocaleDateString(`fr-FR`,{weekday:`long`,day:`numeric`,month:`long`,year:`numeric`});
+const LAUNCH = new Date(2026,11,1); // ouverture : 1er décembre 2026, puis toutes les années
+const NOW = new Date();
+const MIN = new Date(Math.max(LAUNCH.getTime(), new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate()).getTime()));
+const MONTH = {y:MIN.getFullYear(),m:MIN.getMonth()};
+const dateLabel = d => d.toLocaleDateString(`fr-FR`,{weekday:`long`,day:`numeric`,month:`long`,year:`numeric`});
 const endTime = (t,h) => { const [a,b]=t.split(`:`).map(Number); const m=a*60+b+h*60; return String(Math.floor(m/60)%24).padStart(2,`0`)+`:`+String(m%60).padStart(2,`0`); };
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function nav(back,nextOk,nextLabel){
   return `<div class="row">${back?`<button class="btn g" onclick="go(${S.step-1})">Retour</button>`:``}${nextLabel?`<button class="btn" ${nextOk?``:`disabled`} onclick="go(${S.step+1})">${nextLabel}</button>`:``}</div>`;
 }
+function mv(k){let m=MONTH.m+k,y=MONTH.y;if(m<0){m=11;y--}if(m>11){m=0;y++}if(new Date(y,m+1,0)<MIN)return;MONTH.y=y;MONTH.m=m;render();}
 function go(n){ S.step=n; render(); window.scrollTo(0,0); }
 
 function render(){
@@ -96,8 +101,8 @@ function render(){
     const days = new Date(MONTH.y,MONTH.m+1,0).getDate();
     let g = [`L`,`M`,`M`,`J`,`V`,`S`,`D`].map(x=>`<div class="h">${x}</div>`).join(``);
     for(let i=0;i<lead;i++) g+=`<div></div>`;
-    for(let d=1;d<=days;d++) g+=`<button class="${S.date===d?`on`:``}" onclick="S.date=${d};S.time=null;render()">${d}</button>`;
-    v.innerHTML = `<h1>Décembre 2026</h1><p class="sub">${esc(S.mode)} · choisis ton jour.</p><div class="cal">${g}</div>${S.date?`<p class="sub"><b>${dateLabel(S.date)}</b></p>`:``}${nav(1,S.date,`Voir les heures`)}`;
+    for(let d=1;d<=days;d++){const dt=new Date(MONTH.y,MONTH.m,d);g+=`<button ${dt<MIN?`disabled`:``} class="${S.date&&S.date.getTime()===dt.getTime()?`on`:``}" onclick="S.date=new Date(${MONTH.y},${MONTH.m},${d});S.time=null;render()">${d}</button>`;}
+    v.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><button class="btn g" onclick="mv(-1)">‹</button><h1 style="margin:0;text-transform:capitalize">${new Date(MONTH.y,MONTH.m,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</h1><button class="btn g" onclick="mv(1)">›</button></div><p class="sub">${esc(S.mode)} · choisis ton jour.</p><div class="cal">${g}</div>${S.date?`<p class="sub"><b>${dateLabel(S.date)}</b></p>`:``}${nav(1,S.date,`Voir les heures`)}`;
   }
   if(S.step===2){
     v.innerHTML = `<h1>À quelle heure ?</h1><p class="sub">${dateLabel(S.date)}</p><div class="slots">${HOURS.map(h=>`<button class="slot ${S.time===h?`on`:``}" onclick="S.time='${h}';render()">${h}</button>`).join(``)}</div>${nav(1,S.time,`Choisir mon package`)}`;
