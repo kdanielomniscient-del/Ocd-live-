@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OCD Live – Réserver mon live</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#fbf7f2;--card:#fff;--ink:#231a14;--mut:#7a6a5e;--acc:#c2581c;--accink:#fff;--line:#e8dccf;--glow:#f6d9b8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17120e;--card:#221b15;--ink:#f6ece2;--mut:#b3a396;--acc:#e8782f;--accink:#1a0f07;--line:#3a2f26;--glow:#3b2a1a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17120e;--card:#221b15;--ink:#f6ece2;--mut:#b3a396;--acc:#e8782f;--accink:#1a0f07;--line:#3a2f26;--glow:#3b2a1a;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{max-width:520px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo{font-weight:800;font-size:22px;letter-spacing:.5px;color:var(--acc)}
+.logo small{color:var(--ink);font-weight:700;margin-left:4px}
+.bar{height:5px;background:var(--line);border-radius:9px;overflow:hidden;margin-bottom:18px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+h1{font-size:23px;margin:0 0 4px}
+p.sub{margin:0 0 16px;color:var(--mut);font-size:15px}
+.big{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px;color:var(--ink);font:inherit;cursor:pointer}
+.big:hover,.big:focus-visible{border-color:var(--acc);outline:none}
+.big b{display:block;font-size:19px;margin-bottom:3px}
+.big span{color:var(--mut);font-size:14px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px}
+.cal div.h{font-size:12px;color:var(--mut);text-align:center}
+.cal button{aspect-ratio:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+.cal button.on,.slot.on,.pk.on{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slot{padding:14px 8px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;font:inherit;font-weight:600;cursor:pointer}
+.pk{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;font:inherit;cursor:pointer;position:relative}
+.pk .p{float:right;font-weight:800;color:var(--acc)}
+.pk.on .p{color:var(--accink)}
+.pk small{display:block;color:var(--mut);margin-top:2px}
+.pk.on small{color:var(--accink)}
+.tag{display:inline-block;background:var(--glow);color:var(--acc);font-size:11px;font-weight:700;border-radius:20px;padding:2px 8px;margin-left:6px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.row{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:14px;border-radius:12px;border:0;background:var(--acc);color:var(--accink);font:inherit;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.btn.g{background:transparent;color:var(--ink);border:1px solid var(--line);flex:0 0 auto;padding:14px 18px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.sum{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 14px;margin-bottom:12px}
+.sum div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.sum div:last-child{border:0}
+.sum span{color:var(--mut)}
+.sum b{text-align:right}
+.note{font-size:13px;color:var(--mut);margin-top:10px}
+</style>
+</head>
+<body>
+<main>
+<header><div class="logo">OCD<small>Live</small></div></header>
+<div class="bar"><i id="bar"></i></div>
+<section id="v"></section>
+</main>
+<script>
+// À RENSEIGNER : où Bouvann reçoit les réservations
+const NOTIFY_WHATSAPP = ""; // ex. "22890000000" (indicatif + numéro, sans +)
+const NOTIFY_EMAIL = "";    // ex. "contact@bouvann.com"
+
+const PACKS = [
+  {id:1,n:`Live 1h30`,d:`1h30 en studio ou à distance, avec régie`,p:15000,h:1.5},
+  {id:2,n:`Live longue durée`,d:`4 heures, tarif réduit à l’heure`,p:35000,h:4,t:`Économique`},
+  {id:3,n:`Live + annonce`,d:`On annonce ton live sur notre compte, puis 1h30 de live`,p:25000,h:1.5,t:`Visibilité`},
+  {id:4,n:`Pack Semaine`,d:`3 lives de 1h30 sur 7 jours`,p:40000,h:1.5},
+  {id:5,n:`Pack Mois`,d:`12 lives de 1h30 sur le mois`,p:120000,h:1.5},
+  {id:6,n:`Pack Mois Premium`,d:`12 lives + annonces vidéo sur notre compte`,p:180000,h:1.5,t:`Complet`}
+];
+const HOURS = [`08:00`,`10:00`,`12:00`,`14:00`,`16:00`,`18:00`];
+const S = {step:0,mode:null,date:null,time:null,pack:null,f:{nom:``,tel:``,email:``,biz:``,produit:``,ville:``}};
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString(`fr-FR`)+` FCFA`;
+const MONTH = {y:2026,m:11}; // décembre 2026
+const dateLabel = d => new Date(MONTH.y,MONTH.m,d).toLocaleDateString(`fr-FR`,{weekday:`long`,day:`numeric`,month:`long`,year:`numeric`});
+const endTime = (t,h) => { const [a,b]=t.split(`:`).map(Number); const m=a*60+b+h*60; return String(Math.floor(m/60)%24).padStart(2,`0`)+`:`+String(m%60).padStart(2,`0`); };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function nav(back,nextOk,nextLabel){
+  return `<div class="row">${back?`<button class="btn g" onclick="go(${S.step-1})">Retour</button>`:``}${nextLabel?`<button class="btn" ${nextOk?``:`disabled`} onclick="go(${S.step+1})">${nextLabel}</button>`:``}</div>`;
+}
+function go(n){ S.step=n; render(); window.scrollTo(0,0); }
+
+function render(){
+  $(`bar`).style.width = ((S.step+1)/6*100)+`%`;
+  const v = $(`v`);
+  if(S.step===0){
+    v.innerHTML = `<h1>Réserve ton live</h1><p class="sub">Choisis comment tu veux passer en live.</p>
+    <button class="big" onclick="S.mode='Présentiel à Lomé';go(1)"><b>Live en présentiel</b><span>Au studio, à Lomé (Togo)</span></button>
+    <button class="big" onclick="S.mode='À distance';go(1)"><b>Live à distance</b><span>Depuis chez toi, partout en Afrique ou dans le monde</span></button>`;
+  }
+  if(S.step===1){
+    const first = new Date(MONTH.y,MONTH.m,1).getDay(); const lead=(first+6)%7;
+    const days = new Date(MONTH.y,MONTH.m+1,0).getDate();
+    let g = [`L`,`M`,`M`,`J`,`V`,`S`,`D`].map(x=>`<div class="h">${x}</div>`).join(``);
+    for(let i=0;i<lead;i++) g+=`<div></div>`;
+    for(let d=1;d<=days;d++) g+=`<button class="${S.date===d?`on`:``}" onclick="S.date=${d};S.time=null;render()">${d}</button>`;
+    v.innerHTML = `<h1>Décembre 2026</h1><p class="sub">${esc(S.mode)} · choisis ton jour.</p><div class="cal">${g}</div>${S.date?`<p class="sub"><b>${dateLabel(S.date)}</b></p>`:``}${nav(1,S.date,`Voir les heures`)}`;
+  }
+  if(S.step===2){
+    v.innerHTML = `<h1>À quelle heure ?</h1><p class="sub">${dateLabel(S.date)}</p><div class="slots">${HOURS.map(h=>`<button class="slot ${S.time===h?`on`:``}" onclick="S.time='${h}';render()">${h}</button>`).join(``)}</div>${nav(1,S.time,`Choisir mon package`)}`;
+  }
+  if(S.step===3){
+    v.innerHTML = `<h1>Ton package</h1><p class="sub">Choisis la formule qui te convient.</p>${PACKS.map(k=>`<button class="pk ${S.pack&&S.pack.id===k.id?`on`:``}" onclick="S.pack=PACKS[${k.id-1}];render()"><span class="p">${fmt(k.p)}</span><b>${k.n}</b>${k.t?`<span class="tag">${k.t}</span>`:``}<small>${k.d}</small></button>`).join(``)}${nav(1,S.pack,`Mes informations`)}`;
+  }
+  if(S.step===4){
+    const f=S.f, ok=f.nom&&f.tel&&f.biz&&f.produit;
+    v.innerHTML = `<h1>Tes informations</h1><p class="sub">Pour que les clients te retrouvent.</p>
+    <label>Nom complet</label><input id="nom" value="${esc(f.nom)}" autocomplete="name">
+    <label>Téléphone (WhatsApp)</label><input id="tel" type="tel" value="${esc(f.tel)}" autocomplete="tel">
+    <label>E-mail (facultatif)</label><input id="email" type="email" value="${esc(f.email)}" autocomplete="email">
+    <label>Quel business fais-tu ?</label><input id="biz" placeholder="Ex. restauration, mode, cosmétiques…" value="${esc(f.biz)}">
+    <label>Produit à présenter</label><textarea id="produit" rows="2">${esc(f.produit)}</textarea>
+    <label>Ville / pays</label><input id="ville" placeholder="Ex. Douala, Cameroun" value="${esc(f.ville)}">
+    <div class="row"><button class="btn g" onclick="go(3)">Retour</button><button class="btn" id="nx" onclick="go(5)" ${ok?``:`disabled`}>Voir le récapitulatif</button></div>`;
+    ["nom","tel","email","biz","produit","ville"].forEach(k=>$(k).addEventListener(`input`,e=>{S.f[k]=e.target.value;$(`nx`).disabled=!(S.f.nom&&S.f.tel&&S.f.biz&&S.f.produit);}));
+  }
+  if(S.step===5){
+    const f=S.f,k=S.pack,msg=summaryText();
+    const wa = NOTIFY_WHATSAPP?`<a class="btn" href="https://wa.me/${NOTIFY_WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer par WhatsApp</a>`:``;
+    const em = NOTIFY_EMAIL?`<a class="btn g" href="mailto:${NOTIFY_EMAIL}?subject=${encodeURIComponent(`Réservation OCD Live – `+f.nom)}&body=${encodeURIComponent(msg)}">Envoyer par e-mail</a>`:``;
+    v.innerHTML = `<h1>Récapitulatif</h1><p class="sub">Vérifie puis confirme ta réservation.</p>
+    <div class="sum"><div><span>Nom</span><b>${esc(f.nom)}</b></div><div><span>Business</span><b>${esc(f.biz)}</b></div><div><span>Mode</span><b>${esc(S.mode)}</b></div><div><span>Date</span><b>${dateLabel(S.date)}</b></div><div><span>Horaire</span><b>${S.time} – ${endTime(S.time,k.h)}</b></div><div><span>Package</span><b>${k.n}</b></div><div><span>Total</span><b>${fmt(k.p)}</b></div></div>
+    <div class="row" style="flex-wrap:wrap">${wa}${em}${(!wa&&!em)?`<button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(summaryText());this.textContent='Copié ✓'">Copier la réservation</button>`:``}</div>
+    <p class="note">Notre équipe te confirmera la réservation et le paiement par message.</p>
+    <div class="row"><button class="btn g" onclick="go(4)">Modifier</button></div>`;
+  }
+}
+function summaryText(){
+  const f=S.f,k=S.pack;
+  return `Nouvelle réservation OCD Live\n${f.nom} fait du « ${f.biz} »\nProduit : ${f.produit}\nRéservé le ${dateLabel(S.date)} de ${S.time} à ${endTime(S.time,k.h)} (${S.mode})\nPackage : ${k.n} – ${fmt(k.p)}\nTéléphone : ${f.tel}${f.email?`\nE-mail : ${f.email}`:``}${f.ville?`\nVille : ${f.ville}`:``}`;
+}
+render();
+</script>
+</body>
+</html>
